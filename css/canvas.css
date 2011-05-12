@@ -1,0 +1,15 @@
+@font-face {
+    font-family: '8x16';
+    src: url('../font/8x16.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: '8x16';
+    font-size: 100%;
+}
+
+canvas {
+    background: #000;
+}

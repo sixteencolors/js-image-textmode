@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html lang=en>
+<head>
+    <meta charset=utf-8 />
+    <title>JavaScript ANSI Parser</title>
+    <link rel=stylesheet type=text/css href=css/canvas.css />
+    <script type=text/javascript src=js/ansiparser.js></script>
+    <script type=text/javascript>
+window.onload = function() {
+    var parser = new ANSIParser();
+    parser.parse( '[0m[1;30mT[5;37;44mE[0;34;44mS[0;33;42mT[37;40m' );
+    parser.render_canvas( document.getElementById( 'canvas' ) );
+};
+    </script>
+</head>
+<body>
+<canvas id=canvas></canvas>
+</body>
+</html>
