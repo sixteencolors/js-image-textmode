@@ -1,4 +1,4 @@
-class ANSIParser
+class @ANSIParser
     state = 0
     x = 0
     y = 0
