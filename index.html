@@ -2,14 +2,30 @@
 <html lang=en>
 <head>
     <meta charset=utf-8 />
-    <title>JavaScript ANSI Parser</title>
+    <title>JavaScript TextMode Image Library</title>
     <link rel=stylesheet type=text/css href=css/canvas.css />
-    <script type=text/javascript src=js/ansiparser.js></script>
+    <script type=text/javascript src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+    <script type=text/javascript src="js/jquery.url.js"></script>
+    <script type=text/javascript src=js/textmode.js></script>
     <script type=text/javascript>
 window.onload = function() {
-    var parser = new ANSIParser();
-    parser.parse( '[0m[1;30mT[5;37;44mE[0;34;44mS[0;33;42mT[37;40m' );
-    parser.render_canvas( document.getElementById( 'canvas' ) );
+    var image;
+    var url;
+
+    if( ( url = $.url().param( 'xbin' ) ) != null ) {
+        image = new ImageTextModeXBin();
+        image.parseUrl( url );
+    }
+    else if( ( url = $.url().param( 'ansi' ) ) != null ) {
+        image = new ImageTextModeANSI();
+        image.parseUrl( url );
+    }
+    else {
+        image = new ImageTextModeANSI();
+        image.parse( '[0m[1;30mT[5;37;44mE[0;34;44mS[0;33;42mT[37;40m' );
+    }
+
+    image.renderCanvas( document.getElementById( 'canvas' ) );
 };
     </script>
 </head>
