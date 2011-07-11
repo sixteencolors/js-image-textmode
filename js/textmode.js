@@ -164,7 +164,7 @@
         g = g << 2 | g >> 4;
         b = this.getByteAt(data, i + 2);
         b = b << 2 | b >> 4;
-        colors[i / 3] = [r, g, b];
+        colors.push([r, g, b]);
       }
       return this.palette = new ImageTextModePalette({
         colors: colors
@@ -610,11 +610,10 @@
       }
     }
     ImageTextModeBin.prototype.parse = function(content) {
-      var attr, ch, i, x, y, _ref, _results;
+      var attr, ch, i, x, y, _ref;
       x = 0;
       y = 0;
       this.screen[y] = [];
-      _results = [];
       for (i = 0, _ref = content.length - 2; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
         ch = content.substr(i, 1);
         if (ch === "\x1a") {
@@ -626,9 +625,15 @@
           'attr': attr
         };
         x++;
-        _results.push(x === this.linewrap ? (x = 0, y++, !(this.screen[y] != null) && i + 2 < content.length && content.substr(i + 2, 1) !== "\x1a" ? this.screen[y] = [] : void 0) : void 0);
+        if (x === this.linewrap) {
+          x = 0;
+          y++;
+          this.screen[y] = [];
+        }
       }
-      return _results;
+      if (this.screen[y].length === 0) {
+        return this.screen.pop();
+      }
     };
     return ImageTextModeBin;
   }).call(this);
@@ -700,5 +705,70 @@
       }
     };
     return ImageTextModeIDF;
+  }).call(this);
+  this.ImageTextModeADF = (function() {
+    var COLOR_INDEX;
+    __extends(ImageTextModeADF, this.ImageTextMode);
+    COLOR_INDEX = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63];
+    function ImageTextModeADF(options) {
+      var k, v;
+      ImageTextModeADF.__super__.constructor.apply(this, arguments);
+      this.header = {
+        version: 0
+      };
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModeADF.prototype.parse = function(content) {
+      var attr, ch, i, x, y, _ref;
+      this.header.version = this.getByteAt(content, 0);
+      this.parsePaletteData(content.substr(1, 192));
+      this.parseFontData(content.substr(193, 4096));
+      x = 0;
+      y = 0;
+      this.screen[y] = [];
+      for (i = 4289, _ref = content.length - 2; (4289 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+        ch = content.substr(i, 1);
+        if (ch === "\x1a") {
+          break;
+        }
+        attr = this.getByteAt(content, i + 1);
+        this.screen[y][x] = {
+          'ch': ch,
+          'attr': attr
+        };
+        x++;
+        if (x === 80) {
+          x = 0;
+          y++;
+          this.screen[y] = [];
+        }
+      }
+      if (this.screen[y].length === 0) {
+        return this.screen.pop();
+      }
+    };
+    ImageTextModeADF.prototype.parsePaletteData = function(data) {
+      var b, colors, g, i, j, r, _i, _len;
+      colors = [];
+      for (_i = 0, _len = COLOR_INDEX.length; _i < _len; _i++) {
+        i = COLOR_INDEX[_i];
+        j = i * 3;
+        r = this.getByteAt(data, j);
+        r = r << 2 | r >> 4;
+        g = this.getByteAt(data, j + 1);
+        g = g << 2 | g >> 4;
+        b = this.getByteAt(data, j + 2);
+        b = b << 2 | b >> 4;
+        colors.push([r, g, b]);
+      }
+      return this.palette = new ImageTextModePalette({
+        colors: colors
+      });
+    };
+    return ImageTextModeADF;
   }).call(this);
 }).call(this);

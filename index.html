@@ -28,6 +28,10 @@ window.onload = function() {
         image = new ImageTextModeIDF();
         image.parseUrl( url );
     }
+    else if( ( url = $.url().param( 'adf' ) ) != null ) {
+        image = new ImageTextModeADF();
+        image.parseUrl( url );
+    }
     else {
         image = new ImageTextModeANSI();
         image.parse( '[0m[1;30mT[5;37;44mE[0;34;44mS[0;33;42mT[37;40m' );
