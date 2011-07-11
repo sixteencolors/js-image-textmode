@@ -957,7 +957,6 @@ class @ImageTextModeXBin extends @ImageTextMode
         headerData = content.substr( 0, 11 )
         if headerData.length is not 11 || !headerData.match( '^XBIN\x1a' )
             throw new Error( 'File is not an XBin' )
-            return
 
         @header.width = @unpackShort( headerData.substr( 5, 2 ) )
         @header.height = @unpackShort( headerData.substr( 7, 2 ) )
@@ -1051,7 +1050,7 @@ class @ImageTextModeXBin extends @ImageTextMode
         y = 0
         @screen[ y ] = []
 
-        for i in [ 0 .. data.length - 3 ] by 2
+        for i in [ 0 .. data.length - 2 ] by 2
             ch = data.substr( i, 1 )
             break if ch == "\x1a"
             attr = @getByteAt( data, i + 1 )
@@ -1214,7 +1213,7 @@ class @ImageTextModeBin extends @ImageTextMode
         y = 0
         @screen[ y ] = []
 
-        for i in [ 0 .. content.length - 3 ] by 2
+        for i in [ 0 .. content.length - 2 ] by 2
             ch = content.substr( i, 1 )
             break if ch == "\x1a"
             attr = @getByteAt( content, i + 1 )
@@ -1223,5 +1222,4 @@ class @ImageTextModeBin extends @ImageTextMode
             if x == @linewrap
                 x = 0
                 y++
-                @screen[ y ] = [] if !@screen[ y ]?
-
+                @screen[ y ] = [] if !@screen[ y ]? && i + 2 < content.length && content.substr( i + 2, 1 ) != "\x1a"

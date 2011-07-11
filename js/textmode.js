@@ -231,7 +231,6 @@
       headerData = content.substr(0, 11);
       if (headerData.length === !11 || !headerData.match('^XBIN\x1a')) {
         throw new Error('File is not an XBin');
-        return;
       }
       this.header.width = this.unpackShort(headerData.substr(5, 2));
       this.header.height = this.unpackShort(headerData.substr(7, 2));
@@ -362,7 +361,7 @@
       y = 0;
       this.screen[y] = [];
       _results = [];
-      for (i = 0, _ref = data.length - 3; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+      for (i = 0, _ref = data.length - 2; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
         ch = data.substr(i, 1);
         if (ch === "\x1a") {
           break;
@@ -614,7 +613,7 @@
       y = 0;
       this.screen[y] = [];
       _results = [];
-      for (i = 0, _ref = content.length - 3; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+      for (i = 0, _ref = content.length - 2; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
         ch = content.substr(i, 1);
         if (ch === "\x1a") {
           break;
@@ -625,7 +624,7 @@
           'attr': attr
         };
         x++;
-        _results.push(x === this.linewrap ? (x = 0, y++, !(this.screen[y] != null) ? this.screen[y] = [] : void 0) : void 0);
+        _results.push(x === this.linewrap ? (x = 0, y++, !(this.screen[y] != null) && i + 2 < content.length && content.substr(i + 2, 1) !== "\x1a" ? this.screen[y] = [] : void 0) : void 0);
       }
       return _results;
     };
