@@ -596,4 +596,39 @@
     };
     return ImageTextModeANSI;
   }).call(this);
+  this.ImageTextModeBin = (function() {
+    __extends(ImageTextModeBin, this.ImageTextMode);
+    function ImageTextModeBin(options) {
+      var k, v;
+      ImageTextModeBin.__super__.constructor.apply(this, arguments);
+      this.linewrap = 160;
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModeBin.prototype.parse = function(content) {
+      var attr, ch, i, x, y, _ref, _results;
+      x = 0;
+      y = 0;
+      this.screen[y] = [];
+      _results = [];
+      for (i = 0, _ref = content.length - 3; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+        ch = content.substr(i, 1);
+        if (ch === "\x1a") {
+          break;
+        }
+        attr = this.getByteAt(content, i + 1);
+        this.screen[y][x] = {
+          'ch': ch,
+          'attr': attr
+        };
+        x++;
+        _results.push(x === this.linewrap ? (x = 0, y++, !(this.screen[y] != null) ? this.screen[y] = [] : void 0) : void 0);
+      }
+      return _results;
+    };
+    return ImageTextModeBin;
+  }).call(this);
 }).call(this);
