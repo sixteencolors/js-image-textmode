@@ -154,6 +154,40 @@
     ImageTextMode.prototype.getHeight = function() {
       return this.screen.length;
     };
+    ImageTextMode.prototype.parsePaletteData = function(data) {
+      var b, colors, g, i, r;
+      colors = [];
+      for (i = 0; i <= 45; i += 3) {
+        r = this.getByteAt(data, i);
+        r = r << 2 | r >> 4;
+        g = this.getByteAt(data, i + 1);
+        g = g << 2 | g >> 4;
+        b = this.getByteAt(data, i + 2);
+        b = b << 2 | b >> 4;
+        colors[i / 3] = [r, g, b];
+      }
+      return this.palette = new ImageTextModePalette({
+        colors: colors
+      });
+    };
+    ImageTextMode.prototype.parseFontData = function(data, height) {
+      var chars, chr, i, j, _ref, _ref2;
+      if (height == null) {
+        height = 16;
+      }
+      chars = [];
+      for (i = 0, _ref = data.length / height - 1; (0 <= _ref ? i <= _ref : i >= _ref); (0 <= _ref ? i += 1 : i -= 1)) {
+        chr = [];
+        for (j = 0, _ref2 = height - 1; (0 <= _ref2 ? j <= _ref2 : j >= _ref2); (0 <= _ref2 ? j += 1 : j -= 1)) {
+          chr.push(this.getByteAt(data, i * height + j));
+        }
+        chars.push(chr);
+      }
+      return this.font = new ImageTextModeFont({
+        chars: chars,
+        height: height
+      });
+    };
     ImageTextMode.prototype.renderCanvas = function(canvasElem) {
       var bg, canvas, chr, ctx, cx, cy, fg, h, i, j, line, pixel, px, py, w, _ref, _ref2, _ref3, _ref4;
       w = this.getWidth() * this.font.width;
@@ -238,7 +272,7 @@
       this.header.flags = this.getByteAt(headerData.substr(10, 1));
       offset = 11;
       if (this.header.flags & PALETTE) {
-        this._parse_palette(content.substr(offset, 48));
+        this.parsePaletteData(content.substr(offset, 48));
         offset += 48;
       }
       if (this.header.flags & FONT) {
@@ -248,7 +282,7 @@
         } else {
           fontlength *= 256;
         }
-        this._parse_font(content.substr(offset, fontlength));
+        this.parseFontData(content.substr(offset, fontlength), this.header.fontsize);
         offset += fontlength;
       }
       if (this.header.flags & COMPRESSED) {
@@ -256,38 +290,6 @@
       } else {
         return this._parse_uncompressed(content.substr(offset));
       }
-    };
-    ImageTextModeXBin.prototype._parse_palette = function(data) {
-      var b, colors, g, i, r;
-      colors = [];
-      for (i = 0; i <= 45; i += 3) {
-        r = this.getByteAt(data, i);
-        r = r << 2 | r >> 4;
-        g = this.getByteAt(data, i + 1);
-        g = g << 2 | g >> 4;
-        b = this.getByteAt(data, i + 2);
-        b = b << 2 | b >> 4;
-        colors[i / 3] = [r, g, b];
-      }
-      return this.palette = new ImageTextModePalette({
-        colors: colors
-      });
-    };
-    ImageTextModeXBin.prototype._parse_font = function(data) {
-      var chars, chr, height, i, j, _ref, _ref2;
-      height = this.header.fontsize;
-      chars = [];
-      for (i = 0, _ref = data.length / height - 1; (0 <= _ref ? i <= _ref : i >= _ref); (0 <= _ref ? i += 1 : i -= 1)) {
-        chr = [];
-        for (j = 0, _ref2 = height - 1; (0 <= _ref2 ? j <= _ref2 : j >= _ref2); (0 <= _ref2 ? j += 1 : j -= 1)) {
-          chr.push(this.getByteAt(data, i * height + j));
-        }
-        chars.push(chr);
-      }
-      return this.font = new ImageTextModeFont({
-        chars: chars,
-        height: height
-      });
     };
     ImageTextModeXBin.prototype._parse_compressed = function(data) {
       var attr, ch, counter, info, type, x, y, _results;
@@ -629,5 +631,74 @@
       return _results;
     };
     return ImageTextModeBin;
+  }).call(this);
+  this.ImageTextModeIDF = (function() {
+    __extends(ImageTextModeIDF, this.ImageTextMode);
+    function ImageTextModeIDF(options) {
+      var k, v;
+      ImageTextModeIDF.__super__.constructor.apply(this, arguments);
+      this.header = {
+        x0: 0,
+        x1: 0,
+        y0: 0,
+        y1: 0
+      };
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModeIDF.prototype.parse = function(content) {
+      var attr, buffer, ch, eodata, headerData, i, info, len, offset, x, y;
+      headerData = content.substr(0, 12);
+      if (headerData.length === !12 || !headerData.match('^\x041.4')) {
+        throw new Error('File is not an IDF');
+      }
+      this.header.x0 = this.unpackShort(headerData.substr(4, 2));
+      this.header.y0 = this.unpackShort(headerData.substr(6, 2));
+      this.header.x1 = this.unpackShort(headerData.substr(8, 2));
+      this.header.y1 = this.unpackShort(headerData.substr(10, 2));
+      eodata = content.length - 48 - 4096;
+      if (content.substr(content.length - 128, 5) === 'SAUCE') {
+        eodata -= 128;
+      }
+      this.parseFontData(content.substr(eodata, 4096));
+      this.parsePaletteData(content.substr(eodata + 4096, 48));
+      y = 0;
+      x = 0;
+      this.screen[y] = [];
+      offset = 12;
+      while (offset < eodata) {
+        buffer = content.substr(offset, 2);
+        info = this.unpackShort(buffer);
+        offset += 2;
+        len = 1;
+        if (info === 1) {
+          len = this.unpackShort(content.substr(offset, 2)) & 255;
+          offset += 2;
+          buffer = content.substr(offset, 2);
+          offset += 2;
+        }
+        ch = buffer.substr(0, 1);
+        attr = this.getByteAt(buffer, 1);
+        for (i = 1; (1 <= len ? i <= len : i >= len); (1 <= len ? i += 1 : i -= 1)) {
+          this.screen[y][x] = {
+            'ch': ch,
+            'attr': attr
+          };
+          x++;
+          if (x > this.header.x1) {
+            x = 0;
+            y++;
+            this.screen[y] = [];
+          }
+        }
+      }
+      if (this.screen[y].length === 0) {
+        return this.screen.pop();
+      }
+    };
+    return ImageTextModeIDF;
   }).call(this);
 }).call(this);

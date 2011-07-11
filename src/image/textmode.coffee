@@ -893,6 +893,28 @@ class @ImageTextMode
     getHeight: ->
         return @screen.length
 
+    parsePaletteData: ( data ) ->
+        colors = []
+        for i in [ 0 .. 45 ] by 3
+            r = @getByteAt( data, i )
+            r = r << 2 | r >> 4
+            g = @getByteAt( data, i + 1 )
+            g = g << 2 | g >> 4
+            b = @getByteAt( data, i + 2 )
+            b = b << 2 | b >> 4
+            colors[ i / 3 ] = [ r, g, b ]
+
+        @palette = new ImageTextModePalette( { colors: colors } )
+
+    parseFontData: ( data, height = 16 ) ->
+        chars = []
+        for i in [ 0 .. data.length / height - 1 ]
+            chr = []
+            for j in [ 0 .. height - 1 ]
+                chr.push @getByteAt( data, i * height + j )
+            chars.push chr 
+        @font = new ImageTextModeFont( { chars: chars, height: height } )
+
     renderCanvas: ( canvasElem ) ->
         w = @getWidth() * @font.width
         h = @getHeight() * @font.height
@@ -965,7 +987,7 @@ class @ImageTextModeXBin extends @ImageTextMode
         offset = 11
 
         if @header.flags & PALETTE
-            @_parse_palette( content.substr( offset, 48 ) );
+            @parsePaletteData( content.substr( offset, 48 ) );
             offset += 48
 
         if @header.flags & FONT
@@ -974,36 +996,13 @@ class @ImageTextModeXBin extends @ImageTextMode
                 fontlength *= 512
             else
                 fontlength *= 256
-            @_parse_font( content.substr( offset, fontlength ) );
+            @parseFontData( content.substr( offset, fontlength ), @header.fontsize );
             offset += fontlength
 
         if @header.flags & COMPRESSED
             @_parse_compressed( content.substr( offset ) )
         else
             @_parse_uncompressed( content.substr( offset ) )
-
-    _parse_palette: ( data ) ->
-        colors = []
-        for i in [ 0 .. 45 ] by 3
-            r = @getByteAt( data, i )
-            r = r << 2 | r >> 4
-            g = @getByteAt( data, i + 1 )
-            g = g << 2 | g >> 4
-            b = @getByteAt( data, i + 2 )
-            b = b << 2 | b >> 4
-            colors[ i / 3 ] = [ r, g, b ]
-
-        @palette = new ImageTextModePalette( { colors: colors } )
-
-    _parse_font: ( data ) ->
-        height = @header.fontsize
-        chars = []
-        for i in [ 0 .. data.length / height - 1 ]
-            chr = []
-            for j in [ 0 .. height - 1 ]
-                chr.push @getByteAt( data, i * height + j )
-            chars.push chr 
-        @font = new ImageTextModeFont( { chars: chars, height: height } )
 
     _parse_compressed: ( data ) ->
         x = 0
@@ -1223,3 +1222,58 @@ class @ImageTextModeBin extends @ImageTextMode
                 x = 0
                 y++
                 @screen[ y ] = [] if !@screen[ y ]? && i + 2 < content.length && content.substr( i + 2, 1 ) != "\x1a"
+
+class @ImageTextModeIDF extends @ImageTextMode
+
+    constructor: ( options ) ->
+        super
+        @header = { x0: 0, x1: 0, y0: 0, y1: 0 }
+        this[k]  = v for own k, v of options
+
+    parse: ( content ) ->
+        headerData = content.substr( 0, 12 )
+        if headerData.length is not 12 || !headerData.match( '^\x041.4' )
+            throw new Error( 'File is not an IDF' )
+
+        @header.x0 = @unpackShort( headerData.substr( 4, 2 ) )
+        @header.y0 = @unpackShort( headerData.substr( 6, 2 ) )
+        @header.x1 = @unpackShort( headerData.substr( 8, 2 ) )
+        @header.y1 = @unpackShort( headerData.substr( 10, 2 ) )
+
+        eodata = content.length - 48 - 4096
+
+        if content.substr( content.length - 128, 5 ) == 'SAUCE'
+            eodata -= 128
+
+        @parseFontData( content.substr( eodata, 4096 ) )
+        @parsePaletteData( content.substr( eodata + 4096, 48 ) )
+
+        y = 0
+        x = 0
+        @screen[ y ] = []
+        offset = 12
+
+        while offset < eodata
+            buffer  = content.substr( offset, 2 )
+            info    = @unpackShort( buffer )
+            offset += 2
+            len     = 1
+
+            if info == 1
+                len     = @unpackShort( content.substr( offset, 2 ) ) & 255
+                offset += 2
+                buffer  = content.substr( offset, 2 )
+                offset += 2
+
+            ch   = buffer.substr( 0, 1 )
+            attr = @getByteAt( buffer, 1 )
+
+            for i in [ 1 .. len ]
+                @screen[ y ][ x ] = { 'ch': ch, 'attr': attr }
+                x++
+                if x > @header.x1
+                    x = 0
+                    y++
+                    @screen[ y ] = []
+
+        @screen.pop() if @screen[ y ].length == 0
