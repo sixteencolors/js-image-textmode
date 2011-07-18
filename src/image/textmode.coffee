@@ -881,6 +881,12 @@ class @ImageTextMode
             shrt += 65536
         return shrt
 
+    unpackLong: ( data ) ->
+        lng = ((( @getByteAt( data, 0 ) << 8 ) + @getByteAt( data, 1 ) << 8 ) + @getByteAt( data, 2 ) << 8 ) + @getByteAt( data, 3 )
+        if lng < 0
+            lng += 4294967296
+        return lng;
+
     getByteAt: ( data, offset ) ->
         return data.charCodeAt( offset ) & 0xFF
 
@@ -929,8 +935,13 @@ class @ImageTextMode
             for cx in [ 0 .. @screen[ cy ].length - 1 ]
                 pixel = @screen[ cy ][ cx ]
                 continue if !pixel?
-                fg = pixel.attr & 15
-                bg = ( pixel.attr & 240 ) >> 4
+                if attr?
+                    fg = pixel.attr & 15
+                    bg = ( pixel.attr & 240 ) >> 4
+                else
+                    fg = pixel.fg
+                    bg = pixel.bg
+
                 px = cx * 8
                 py = cy * 16
 
@@ -1323,5 +1334,75 @@ class @ImageTextModeADF extends @ImageTextMode
             b = b << 2 | b >> 4
             colors.push [ r, g, b ]
 
+        @palette = new ImageTextModePalette( { colors: colors } )
+
+class @ImageTextModeTundra extends @ImageTextMode
+
+    constructor: ( options ) ->
+        super
+        this[k]  = v for own k, v of options
+
+    parse: ( content ) ->
+        colors = [ [ 0, 0, 0 ] ]
+        palidx = 1
+        x  = 0
+        y  = 0
+        fg = 0
+        bg = 0
+
+        @screen[ y ] = []
+        content = content.substr( 8 ).split( '' )
+        while command = content.shift()
+            break if command == "\x1a"
+            command = command.charCodeAt( 0 )
+
+            if command is 1
+                y = @unpackLong( content.splice( 0, 4 ).join( '' ) )
+                x = @unpackLong( content.splice( 0, 4 ).join( '' ) )
+                @screen[ y ] = [] if !@screen[ y ]?
+                continue
+
+            ch = null
+
+            if command is 2
+                ch  = content.shift()
+                rgb = @unpackLong( content.splice( 0, 4 ).join( '' ) )
+                fg  = palidx++
+                colors.push [
+                    ( rgb >> 16 ) & 0x000000ff,
+                    ( rgb >> 8 ) & 0x000000ff,
+                     rgb & 0x000000ff
+                ]
+            else if command is 4
+                ch  = content.shift()
+                rgb = @unpackLong( content.splice( 0, 4 ).join( '' ) )
+                bg  = palidx++
+                colors.push [
+                    ( rgb >> 16 ) & 0x000000ff,
+                    ( rgb >> 8 ) & 0x000000ff,
+                     rgb & 0x000000ff
+                ]
+            else if command is 6
+                ch  = content.shift()
+                fg  = palidx++
+                bg  = palidx++
+                for [ 0 .. 1 ]
+                    rgb = @unpackLong( content.splice( 0, 4 ).join( '' ) )
+                    colors.push [
+                        ( rgb >> 16 ) & 0x000000ff,
+                        ( rgb >> 8 ) & 0x000000ff,
+                         rgb & 0x000000ff
+                    ]
+
+            ch = String.fromCharCode( command ) unless ch?
+
+            @screen[ y ][ x ] = { 'ch': ch, 'fg': fg, 'bg': bg }
+            x++
+            if x == 80
+                x = 0
+                y++
+                @screen[ y ] = []
+
+        @screen.pop() if @screen[ y ].length == 0
         @palette = new ImageTextModePalette( { colors: colors } )
 

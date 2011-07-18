@@ -138,6 +138,14 @@
       }
       return shrt;
     };
+    ImageTextMode.prototype.unpackLong = function(data) {
+      var lng;
+      lng = (((this.getByteAt(data, 0) << 8) + this.getByteAt(data, 1) << 8) + this.getByteAt(data, 2) << 8) + this.getByteAt(data, 3);
+      if (lng < 0) {
+        lng += 4294967296;
+      }
+      return lng;
+    };
     ImageTextMode.prototype.getByteAt = function(data, offset) {
       return data.charCodeAt(offset) & 0xFF;
     };
@@ -205,8 +213,13 @@
           if (!(pixel != null)) {
             continue;
           }
-          fg = pixel.attr & 15;
-          bg = (pixel.attr & 240) >> 4;
+          if (typeof attr != "undefined" && attr !== null) {
+            fg = pixel.attr & 15;
+            bg = (pixel.attr & 240) >> 4;
+          } else {
+            fg = pixel.fg;
+            bg = pixel.bg;
+          }
           px = cx * 8;
           py = cy * 16;
           ctx.fillStyle = this.palette.toRgbaString(this.palette.colors[bg]);
@@ -770,5 +783,83 @@
       });
     };
     return ImageTextModeADF;
+  }).call(this);
+  this.ImageTextModeTundra = (function() {
+    __extends(ImageTextModeTundra, this.ImageTextMode);
+    function ImageTextModeTundra(options) {
+      var k, v;
+      ImageTextModeTundra.__super__.constructor.apply(this, arguments);
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModeTundra.prototype.parse = function(content) {
+      var bg, ch, colors, command, fg, palidx, rgb, x, y, _i;
+      colors = [[0, 0, 0]];
+      palidx = 1;
+      x = 0;
+      y = 0;
+      fg = 0;
+      bg = 0;
+      this.screen[y] = [];
+      content = content.substr(8).split('');
+      while (command = content.shift()) {
+        if (command === "\x1a") {
+          break;
+        }
+        command = command.charCodeAt(0);
+        if (command === 1) {
+          y = this.unpackLong(content.splice(0, 4).join(''));
+          x = this.unpackLong(content.splice(0, 4).join(''));
+          if (!(this.screen[y] != null)) {
+            this.screen[y] = [];
+          }
+          continue;
+        }
+        ch = null;
+        if (command === 2) {
+          ch = content.shift();
+          rgb = this.unpackLong(content.splice(0, 4).join(''));
+          fg = palidx++;
+          colors.push([(rgb >> 16) & 0x000000ff, (rgb >> 8) & 0x000000ff, rgb & 0x000000ff]);
+        } else if (command === 4) {
+          ch = content.shift();
+          rgb = this.unpackLong(content.splice(0, 4).join(''));
+          bg = palidx++;
+          colors.push([(rgb >> 16) & 0x000000ff, (rgb >> 8) & 0x000000ff, rgb & 0x000000ff]);
+        } else if (command === 6) {
+          ch = content.shift();
+          fg = palidx++;
+          bg = palidx++;
+          for (_i = 0; _i <= 1; _i++) {
+            rgb = this.unpackLong(content.splice(0, 4).join(''));
+            colors.push([(rgb >> 16) & 0x000000ff, (rgb >> 8) & 0x000000ff, rgb & 0x000000ff]);
+          }
+        }
+        if (ch == null) {
+          ch = String.fromCharCode(command);
+        }
+        this.screen[y][x] = {
+          'ch': ch,
+          'fg': fg,
+          'bg': bg
+        };
+        x++;
+        if (x === 80) {
+          x = 0;
+          y++;
+          this.screen[y] = [];
+        }
+      }
+      if (this.screen[y].length === 0) {
+        this.screen.pop();
+      }
+      return this.palette = new ImageTextModePalette({
+        colors: colors
+      });
+    };
+    return ImageTextModeTundra;
   }).call(this);
 }).call(this);
