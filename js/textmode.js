@@ -213,7 +213,7 @@
           if (!(pixel != null)) {
             continue;
           }
-          if (typeof attr != "undefined" && attr !== null) {
+          if (pixel.attr != null) {
             fg = pixel.attr & 15;
             bg = (pixel.attr & 240) >> 4;
           } else {
@@ -861,5 +861,107 @@
       });
     };
     return ImageTextModeTundra;
+  }).call(this);
+  this.ImageTextModePCBoard = (function() {
+    __extends(ImageTextModePCBoard, this.ImageTextMode);
+    function ImageTextModePCBoard(options) {
+      var k, v;
+      ImageTextModePCBoard.__super__.constructor.apply(this, arguments);
+      this.tabstop = 8;
+      this.linewrap = 80;
+      this.codes = {
+        POFF: '',
+        WAIT: ''
+      };
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModePCBoard.prototype.parse = function(content) {
+      var ch, code, i, key, val, _i, _j, _ref, _results;
+      this.screen = [];
+      this.state = 0;
+      this.x = 0;
+      this.y = 0;
+      this.attr = 7;
+      _ref = this.codes;
+      for (key in _ref) {
+        val = _ref[key];
+        code = new RegExp('@' + key + '@', 'g');
+        content.replace(code, val);
+      }
+      content = content.split('');
+      _results = [];
+      while (ch = content.shift()) {
+        if (this.state === 0) {
+          switch (ch) {
+            case "\x1a":
+              this.state = 2;
+              break;
+            case '@':
+              this.state = 1;
+              break;
+            case "\n":
+              this.x = 0;
+              this.y++;
+              break;
+            case "\r":
+              break;
+            case "\t":
+              i = (this.x + 1) % this.tabstop;
+              while (i-- > 0) {
+                this.putpixel(' ');
+              }
+              break;
+            default:
+              this.putpixel(ch);
+          }
+        } else if (this.state === 1) {
+          if (ch === 'X') {
+            this.attr = (parseInt(content.shift(), 16) << 4) + parseInt(content.shift(), 16);
+          } else if (ch + content.slice(0, 3).join('') === 'CLS@') {
+            for (_i = 1; _i <= 3; _i++) {
+              content.shift();
+            }
+            this.screen = [];
+          } else if (ch + content.slice(0, 3).join('') === 'POS:') {
+            for (_j = 1; _j <= 3; _j++) {
+              content.shift();
+            }
+            this.x = content.shift();
+            if (content[0] === !'@') {
+              this.x += content.shift();
+            }
+            this.x--;
+            content.shift();
+          } else {
+            this.putpixel('@');
+            this.putpixel(ch);
+          }
+          this.state = 0;
+        } else if (this.state === 2) {
+          break;
+        } else {
+          this.state = 0;
+        }
+      }
+      return _results;
+    };
+    ImageTextModePCBoard.prototype.putpixel = function(ch) {
+      if (!(this.screen[this.y] != null)) {
+        this.screen[this.y] = [];
+      }
+      this.screen[this.y][this.x] = {
+        ch: ch,
+        attr: this.attr
+      };
+      if (++this.x >= this.linewrap) {
+        this.x = 0;
+        return this.y++;
+      }
+    };
+    return ImageTextModePCBoard;
   }).call(this);
 }).call(this);
