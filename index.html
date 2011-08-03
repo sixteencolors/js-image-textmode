@@ -12,6 +12,13 @@ window.onload = function() {
     var image;
     var url;
 
+    if( ( url = $.url().param( 'sauce' ) ) != null ) {
+        image = new ImageTextModeSAUCE();
+        image.parseUrl( url );
+        console.debug( image );
+        return;
+    }
+
     if( ( url = $.url().param( 'xbin' ) ) != null ) {
         image = new ImageTextModeXBin();
         image.parseUrl( url );
