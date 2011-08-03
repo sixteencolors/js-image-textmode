@@ -152,7 +152,7 @@
     ImageTextMode.prototype.getWidth = function() {
       var max, y, _ref;
       max = 0;
-      for (y = 0, _ref = this.screen.length - 1; (0 <= _ref ? y <= _ref : y >= _ref); (0 <= _ref ? y += 1 : y -= 1)) {
+      for (y = 0, _ref = this.screen.length - 1; 0 <= _ref ? y <= _ref : y >= _ref; 0 <= _ref ? y++ : y--) {
         if ((this.screen[y] != null) && this.screen[y].length > max) {
           max = this.screen[y].length;
         }
@@ -163,9 +163,9 @@
       return this.screen.length;
     };
     ImageTextMode.prototype.parsePaletteData = function(data) {
-      var b, colors, g, i, r;
+      var b, colors, g, i, r, _step;
       colors = [];
-      for (i = 0; i <= 45; i += 3) {
+      for (i = 0, _step = 3; i <= 45; i += _step) {
         r = this.getByteAt(data, i);
         r = r << 2 | r >> 4;
         g = this.getByteAt(data, i + 1);
@@ -184,9 +184,9 @@
         height = 16;
       }
       chars = [];
-      for (i = 0, _ref = data.length / height - 1; (0 <= _ref ? i <= _ref : i >= _ref); (0 <= _ref ? i += 1 : i -= 1)) {
+      for (i = 0, _ref = data.length / height - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
         chr = [];
-        for (j = 0, _ref2 = height - 1; (0 <= _ref2 ? j <= _ref2 : j >= _ref2); (0 <= _ref2 ? j += 1 : j -= 1)) {
+        for (j = 0, _ref2 = height - 1; 0 <= _ref2 ? j <= _ref2 : j >= _ref2; 0 <= _ref2 ? j++ : j--) {
           chr.push(this.getByteAt(data, i * height + j));
         }
         chars.push(chr);
@@ -204,11 +204,11 @@
       canvas.setAttribute('width', w);
       canvas.setAttribute('height', h);
       ctx = canvas.getContext('2d');
-      for (cy = 0, _ref = this.screen.length - 1; (0 <= _ref ? cy <= _ref : cy >= _ref); (0 <= _ref ? cy += 1 : cy -= 1)) {
+      for (cy = 0, _ref = this.screen.length - 1; 0 <= _ref ? cy <= _ref : cy >= _ref; 0 <= _ref ? cy++ : cy--) {
         if (!(this.screen[cy] != null)) {
           continue;
         }
-        for (cx = 0, _ref2 = this.screen[cy].length - 1; (0 <= _ref2 ? cx <= _ref2 : cx >= _ref2); (0 <= _ref2 ? cx += 1 : cx -= 1)) {
+        for (cx = 0, _ref2 = this.screen[cy].length - 1; 0 <= _ref2 ? cx <= _ref2 : cx >= _ref2; 0 <= _ref2 ? cx++ : cx--) {
           pixel = this.screen[cy][cx];
           if (!(pixel != null)) {
             continue;
@@ -226,9 +226,9 @@
           ctx.fillRect(px, py, 8, 16);
           ctx.fillStyle = this.palette.toRgbaString(this.palette.colors[fg]);
           chr = this.font.chars[pixel.ch.charCodeAt(0) & 0xff];
-          for (i = 0, _ref3 = this.font.height - 1; (0 <= _ref3 ? i <= _ref3 : i >= _ref3); (0 <= _ref3 ? i += 1 : i -= 1)) {
+          for (i = 0, _ref3 = this.font.height - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
             line = chr[i];
-            for (j = 0, _ref4 = this.font.width - 1; (0 <= _ref4 ? j <= _ref4 : j >= _ref4); (0 <= _ref4 ? j += 1 : j -= 1)) {
+            for (j = 0, _ref4 = this.font.width - 1; 0 <= _ref4 ? j <= _ref4 : j >= _ref4; 0 <= _ref4 ? j++ : j--) {
               if (line & (1 << this.font.width - 1 - j)) {
                 ctx.fillRect(px + j, py + i, 1, 1);
               }
@@ -321,8 +321,8 @@
         ch = null;
         attr = null;
         _results.push((function() {
-          var _results;
-          _results = [];
+          var _results2;
+          _results2 = [];
           while (counter-- > 0) {
             switch (type) {
               case NO_COMPRESSION:
@@ -365,18 +365,18 @@
               }
             }
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
     };
     ImageTextModeXBin.prototype._parse_uncompressed = function(data) {
-      var attr, ch, i, x, y, _ref, _results;
+      var attr, ch, i, x, y, _ref, _results, _step;
       x = 0;
       y = 0;
       this.screen[y] = [];
       _results = [];
-      for (i = 0, _ref = data.length - 2; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+      for (i = 0, _ref = data.length - 2, _step = 2; 0 <= _ref ? i <= _ref : i >= _ref; i += _step) {
         ch = data.substr(i, 1);
         if (ch === "\x1a") {
           break;
@@ -469,14 +469,14 @@
         } else if (this.state === 2) {
           if (ch.match('[A-Za-z]')) {
             args = (function() {
-              var _i, _len, _ref, _results;
+              var _i, _len, _ref, _results2;
               _ref = this.argbuf.split(';');
-              _results = [];
+              _results2 = [];
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 i = _ref[_i];
-                _results.push(parseInt(i));
+                _results2.push(parseInt(i));
               }
-              return _results;
+              return _results2;
             }).call(this);
             switch (ch) {
               case "m":
@@ -550,17 +550,17 @@
                 break;
               case "J":
                 if (args.length === 0 || args[0] === 0) {
-                  for (i = _ref = this.y + 1, _ref2 = screen.length - 1; (_ref <= _ref2 ? i <= _ref2 : i >= _ref2); (_ref <= _ref2 ? i += 1 : i -= 1)) {
+                  for (i = _ref = this.y + 1, _ref2 = screen.length - 1; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
                     this.screen[i] = null;
                   }
-                  for (i = _ref3 = this.x, _ref4 = screen[this.y].length - 1; (_ref3 <= _ref4 ? i <= _ref4 : i >= _ref4); (_ref3 <= _ref4 ? i += 1 : i -= 1)) {
+                  for (i = _ref3 = this.x, _ref4 = screen[this.y].length - 1; _ref3 <= _ref4 ? i <= _ref4 : i >= _ref4; _ref3 <= _ref4 ? i++ : i--) {
                     this.screen[this.y][i] = null;
                   }
                 } else if (args[0] === 1) {
-                  for (i = 0, _ref5 = this.y - 1; (0 <= _ref5 ? i <= _ref5 : i >= _ref5); (0 <= _ref5 ? i += 1 : i -= 1)) {
+                  for (i = 0, _ref5 = this.y - 1; 0 <= _ref5 ? i <= _ref5 : i >= _ref5; 0 <= _ref5 ? i++ : i--) {
                     this.screen[i] = null;
                   }
-                  for (i = 0, _ref6 = this.x; (0 <= _ref6 ? i <= _ref6 : i >= _ref6); (0 <= _ref6 ? i += 1 : i -= 1)) {
+                  for (i = 0, _ref6 = this.x; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
                     this.screen[this.y][i] = null;
                   }
                 } else if (args[0] === 2) {
@@ -571,11 +571,11 @@
                 break;
               case "K":
                 if (args.length === 0 || args[0] === 0) {
-                  for (i = _ref7 = this.x, _ref8 = this.screen[this.y].length - 1; (_ref7 <= _ref8 ? i <= _ref8 : i >= _ref8); (_ref7 <= _ref8 ? i += 1 : i -= 1)) {
+                  for (i = _ref7 = this.x, _ref8 = this.screen[this.y].length - 1; _ref7 <= _ref8 ? i <= _ref8 : i >= _ref8; _ref7 <= _ref8 ? i++ : i--) {
                     this.screen[this.y][i] = null;
                   }
                 } else if (args[0] === 1) {
-                  for (i = 0, _ref9 = this.x; (0 <= _ref9 ? i <= _ref9 : i >= _ref9); (0 <= _ref9 ? i += 1 : i -= 1)) {
+                  for (i = 0, _ref9 = this.x; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
                     this.screen[this.y][i] = null;
                   }
                 } else if (args[0] === 2) {
@@ -623,11 +623,11 @@
       }
     }
     ImageTextModeBin.prototype.parse = function(content) {
-      var attr, ch, i, x, y, _ref;
+      var attr, ch, i, x, y, _ref, _step;
       x = 0;
       y = 0;
       this.screen[y] = [];
-      for (i = 0, _ref = content.length - 2; (0 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+      for (i = 0, _ref = content.length - 2, _step = 2; 0 <= _ref ? i <= _ref : i >= _ref; i += _step) {
         ch = content.substr(i, 1);
         if (ch === "\x1a") {
           break;
@@ -700,7 +700,7 @@
         }
         ch = buffer.substr(0, 1);
         attr = this.getByteAt(buffer, 1);
-        for (i = 1; (1 <= len ? i <= len : i >= len); (1 <= len ? i += 1 : i -= 1)) {
+        for (i = 1; 1 <= len ? i <= len : i >= len; 1 <= len ? i++ : i--) {
           this.screen[y][x] = {
             'ch': ch,
             'attr': attr
@@ -736,14 +736,14 @@
       }
     }
     ImageTextModeADF.prototype.parse = function(content) {
-      var attr, ch, i, x, y, _ref;
+      var attr, ch, i, x, y, _ref, _step;
       this.header.version = this.getByteAt(content, 0);
       this.parsePaletteData(content.substr(1, 192));
       this.parseFontData(content.substr(193, 4096));
       x = 0;
       y = 0;
       this.screen[y] = [];
-      for (i = 4289, _ref = content.length - 2; (4289 <= _ref ? i <= _ref : i >= _ref); i += 2) {
+      for (i = 4289, _ref = content.length - 2, _step = 2; 4289 <= _ref ? i <= _ref : i >= _ref; i += _step) {
         ch = content.substr(i, 1);
         if (ch === "\x1a") {
           break;
@@ -963,5 +963,112 @@
       }
     };
     return ImageTextModePCBoard;
+  }).call(this);
+  this.ImageTextModeAVATAR = (function() {
+    __extends(ImageTextModeAVATAR, this.ImageTextMode);
+    function ImageTextModeAVATAR(options) {
+      var k, v;
+      ImageTextModeAVATAR.__super__.constructor.apply(this, arguments);
+      this.tabstop = 8;
+      this.linewrap = 80;
+      for (k in options) {
+        if (!__hasProp.call(options, k)) continue;
+        v = options[k];
+        this[k] = v;
+      }
+    }
+    ImageTextModeAVATAR.prototype.parse = function(content) {
+      var c, ch, i, _ref, _ref2, _results;
+      this.screen = [];
+      this.x = 0;
+      this.y = 0;
+      this.attr = 3;
+      content = content.split('');
+      _results = [];
+      while (ch = content.shift()) {
+        if (ch === "\x1a") {
+          break;
+        } else if (ch === "\n") {
+          this.x = 0;
+          this.y++;
+        } else if (ch === "\r") {
+          continue;
+        } else if (ch === "\t") {
+          i = (this.x + 1) % this.tabstop;
+          while (i-- > 0) {
+            this.putpixel(' ');
+          }
+        } else if (ch.charCodeAt(0) === 12) {
+          this.screen = [];
+          this.attr = 3;
+          this.insert = false;
+        } else if (ch.charCodeAt(0) === 25) {
+          ch = content.shift();
+          i = content.shift().charCodeAt(0);
+          while (i-- > 0) {
+            this.putpixel(ch);
+          }
+        } else if (ch.charCodeAt(0) === 22) {
+          c = content.shift().charCodeAt(0);
+          switch (c) {
+            case 1:
+              this.attr = content.shift().charCodeAt(0) & 0x7f;
+              break;
+            case 2:
+              this.attr |= 0x80;
+              break;
+            case 3:
+              this.y--;
+              if (this.y < 0) {
+                this.y = 0;
+              }
+              break;
+            case 4:
+              this.y++;
+              break;
+            case 5:
+              this.x--;
+              if (this.x < 0) {
+                this.x = 0;
+              }
+              break;
+            case 6:
+              this.x++;
+              break;
+            case 7:
+              for (i = _ref = this.x, _ref2 = screen[this.y].length - 1; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
+                this.screen[this.y][i] = null;
+              }
+              break;
+            case 8:
+              this.y = content.shift().charCodeAt(0) - 1;
+              this.x = content.shift().charCodeAt(0) - 1;
+              if (this.y < 0) {
+                this.y = 0;
+              }
+              if (this.x < 0) {
+                this.x = 0;
+              }
+          }
+        } else {
+          this.putpixel(ch);
+        }
+      }
+      return _results;
+    };
+    ImageTextModeAVATAR.prototype.putpixel = function(ch) {
+      if (!(this.screen[this.y] != null)) {
+        this.screen[this.y] = [];
+      }
+      this.screen[this.y][this.x] = {
+        ch: ch,
+        attr: this.attr
+      };
+      if (++this.x >= this.linewrap) {
+        this.x = 0;
+        return this.y++;
+      }
+    };
+    return ImageTextModeAVATAR;
   }).call(this);
 }).call(this);
