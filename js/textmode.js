@@ -1,14 +1,10 @@
 (function() {
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
-    for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
-    function ctor() { this.constructor = child; }
-    ctor.prototype = parent.prototype;
-    child.prototype = new ctor;
-    child.__super__ = parent.prototype;
-    return child;
-  };
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
   this.ImageTextModeSAUCE = (function() {
+
     function ImageTextModeSAUCE() {}
+
     ImageTextModeSAUCE.prototype.parseUrl = function(url) {
       var content, req;
       req = new XMLHttpRequest;
@@ -18,12 +14,11 @@
       content = req.status === 200 || req.status === 0 ? req.responseText : '';
       return this.parse(content);
     };
+
     ImageTextModeSAUCE.prototype.parse = function(content) {
       var commentMarker, i, sauceMarker;
       sauceMarker = content.length - 128;
-      if (content.substr(sauceMarker, 5) === !'SAUCE') {
-        return false;
-      }
+      if (content.substr(sauceMarker, 5) === !'SAUCE') return false;
       this.id = 'SAUCE';
       this.version = content.substr(sauceMarker + 5, 2);
       this.title = content.substr(sauceMarker + 7, 35);
@@ -52,28 +47,31 @@
       }
       return true;
     };
+
     ImageTextModeSAUCE.prototype.unpackLong = function(data) {
       var lng;
       lng = (((this.getByteAt(data, 3) << 8) + this.getByteAt(data, 2) << 8) + this.getByteAt(data, 1) << 8) + this.getByteAt(data, 0);
-      if (lng < 0) {
-        lng += 4294967296;
-      }
+      if (lng < 0) lng += 4294967296;
       return lng;
     };
+
     ImageTextModeSAUCE.prototype.unpackShort = function(data) {
       var shrt;
       shrt = (this.getByteAt(data, 1) << 8) + this.getByteAt(data, 0);
-      if (shrt < 0) {
-        shrt += 65536;
-      }
+      if (shrt < 0) shrt += 65536;
       return shrt;
     };
+
     ImageTextModeSAUCE.prototype.getByteAt = function(data, offset) {
       return data.charCodeAt(offset) & 0xFF;
     };
+
     return ImageTextModeSAUCE;
+
   })();
+
   this.ImageTextModePalette = (function() {
+
     function ImageTextModePalette(options) {
       var k, v;
       this.colors = [];
@@ -83,13 +81,19 @@
         this[k] = v;
       }
     }
+
     ImageTextModePalette.prototype.toRgbaString = function(color) {
       return 'rgba(' + color.join(',') + ',1)';
     };
+
     return ImageTextModePalette;
+
   })();
+
   this.ImageTextModePaletteVGA = (function() {
+
     __extends(ImageTextModePaletteVGA, this.ImageTextModePalette);
+
     function ImageTextModePaletteVGA(options) {
       var k, v;
       ImageTextModePaletteVGA.__super__.constructor.apply(this, arguments);
@@ -100,10 +104,15 @@
         this[k] = v;
       }
     }
+
     return ImageTextModePaletteVGA;
+
   }).call(this);
+
   this.ImageTextModePaletteANSI = (function() {
+
     __extends(ImageTextModePaletteANSI, this.ImageTextModePalette);
+
     function ImageTextModePaletteANSI(options) {
       var k, v;
       ImageTextModePaletteANSI.__super__.constructor.apply(this, arguments);
@@ -114,9 +123,13 @@
         this[k] = v;
       }
     }
+
     return ImageTextModePaletteANSI;
+
   }).call(this);
+
   this.ImageTextModeFont = (function() {
+
     function ImageTextModeFont(options) {
       var k, v;
       this.chars = [];
@@ -127,10 +140,15 @@
         this[k] = v;
       }
     }
+
     return ImageTextModeFont;
+
   })();
+
   this.ImageTextModeFont8x16 = (function() {
+
     __extends(ImageTextModeFont8x16, this.ImageTextModeFont);
+
     function ImageTextModeFont8x16(options) {
       var k, v;
       ImageTextModeFont8x16.__super__.constructor.apply(this, arguments);
@@ -142,10 +160,15 @@
         this[k] = v;
       }
     }
+
     return ImageTextModeFont8x16;
+
   }).call(this);
+
   this.ImageTextModeFont8x8 = (function() {
+
     __extends(ImageTextModeFont8x8, this.ImageTextModeFont);
+
     function ImageTextModeFont8x8(options) {
       var k, v;
       ImageTextModeFont8x8.__super__.constructor.apply(this, arguments);
@@ -157,10 +180,15 @@
         this[k] = v;
       }
     }
+
     return ImageTextModeFont8x8;
+
   }).call(this);
+
   this.ImageTextModeFontAmiga = (function() {
+
     __extends(ImageTextModeFontAmiga, this.ImageTextModeFont);
+
     function ImageTextModeFontAmiga(options) {
       var k, v;
       ImageTextModeFontAmiga.__super__.constructor.apply(this, arguments);
@@ -172,10 +200,15 @@
         this[k] = v;
       }
     }
+
     return ImageTextModeFontAmiga;
+
   }).call(this);
+
   this.ImageTextMode = (function() {
+
     ImageTextMode.VERSION = '0.01';
+
     function ImageTextMode(options) {
       var k, v;
       this.screen = [];
@@ -187,6 +220,7 @@
         this[k] = v;
       }
     }
+
     ImageTextMode.prototype.parseUrl = function(url) {
       var content, req;
       req = new XMLHttpRequest;
@@ -196,25 +230,25 @@
       content = req.status === 200 || req.status === 0 ? req.responseText : '';
       return this.parse(content);
     };
+
     ImageTextMode.prototype.unpackShort = function(data) {
       var shrt;
       shrt = (this.getByteAt(data, 1) << 8) + this.getByteAt(data, 0);
-      if (shrt < 0) {
-        shrt += 65536;
-      }
+      if (shrt < 0) shrt += 65536;
       return shrt;
     };
+
     ImageTextMode.prototype.unpackLong = function(data) {
       var lng;
       lng = (((this.getByteAt(data, 0) << 8) + this.getByteAt(data, 1) << 8) + this.getByteAt(data, 2) << 8) + this.getByteAt(data, 3);
-      if (lng < 0) {
-        lng += 4294967296;
-      }
+      if (lng < 0) lng += 4294967296;
       return lng;
     };
+
     ImageTextMode.prototype.getByteAt = function(data, offset) {
       return data.charCodeAt(offset) & 0xFF;
     };
+
     ImageTextMode.prototype.getWidth = function() {
       var max, y, _ref;
       max = 0;
@@ -225,13 +259,15 @@
       }
       return max;
     };
+
     ImageTextMode.prototype.getHeight = function() {
       return this.screen.length;
     };
+
     ImageTextMode.prototype.parsePaletteData = function(data) {
-      var b, colors, g, i, r, _step;
+      var b, colors, g, i, r;
       colors = [];
-      for (i = 0, _step = 3; i <= 45; i += _step) {
+      for (i = 0; i <= 45; i += 3) {
         r = this.getByteAt(data, i);
         r = r << 2 | r >> 4;
         g = this.getByteAt(data, i + 1);
@@ -244,11 +280,10 @@
         colors: colors
       });
     };
+
     ImageTextMode.prototype.parseFontData = function(data, height) {
       var chars, chr, i, j, _ref, _ref2;
-      if (height == null) {
-        height = 16;
-      }
+      if (height == null) height = 16;
       chars = [];
       for (i = 0, _ref = data.length / height - 1; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
         chr = [];
@@ -262,6 +297,7 @@
         height: height
       });
     };
+
     ImageTextMode.prototype.renderCanvas = function(canvasElem) {
       var bg, canvas, chr, ctx, cx, cy, fg, h, i, j, line, pixel, px, py, w, _ref, _ref2, _ref3, _ref4;
       w = this.getWidth() * this.font.width;
@@ -271,14 +307,10 @@
       canvas.setAttribute('height', h);
       ctx = canvas.getContext('2d');
       for (cy = 0, _ref = this.screen.length - 1; 0 <= _ref ? cy <= _ref : cy >= _ref; 0 <= _ref ? cy++ : cy--) {
-        if (!(this.screen[cy] != null)) {
-          continue;
-        }
+        if (!(this.screen[cy] != null)) continue;
         for (cx = 0, _ref2 = this.screen[cy].length - 1; 0 <= _ref2 ? cx <= _ref2 : cx >= _ref2; 0 <= _ref2 ? cx++ : cx--) {
           pixel = this.screen[cy][cx];
-          if (!(pixel != null)) {
-            continue;
-          }
+          if (!(pixel != null)) continue;
           if (pixel.attr != null) {
             fg = pixel.attr & 15;
             bg = (pixel.attr & 240) >> 4;
@@ -307,22 +339,38 @@
       ctx = canvasElem.getContext('2d');
       return ctx.drawImage(canvas, 0, 0);
     };
+
     return ImageTextMode;
+
   })();
+
   this.ImageTextModeXBin = (function() {
     var ATTRIBUTE_COMPRESSION, CHARACTER_COMPRESSION, COMPRESSED, COMPRESSION_COUNTER, COMPRESSION_TYPE, FIVETWELVE_CHARS, FONT, FULL_COMPRESSION, NON_BLINK, NO_COMPRESSION, PALETTE;
+
     __extends(ImageTextModeXBin, this.ImageTextMode);
+
     PALETTE = 1;
+
     FONT = 2;
+
     COMPRESSED = 4;
+
     NON_BLINK = 8;
+
     FIVETWELVE_CHARS = 16;
+
     NO_COMPRESSION = 0;
+
     CHARACTER_COMPRESSION = 64;
+
     ATTRIBUTE_COMPRESSION = 128;
+
     FULL_COMPRESSION = 192;
+
     COMPRESSION_TYPE = 192;
+
     COMPRESSION_COUNTER = 63;
+
     function ImageTextModeXBin(options) {
       var k, v;
       ImageTextModeXBin.__super__.constructor.apply(this, arguments);
@@ -338,6 +386,7 @@
         this[k] = v;
       }
     }
+
     ImageTextModeXBin.prototype.parse = function(content) {
       var fontlength, headerData, offset;
       this.screen = [];
@@ -370,6 +419,7 @@
         return this._parse_uncompressed(content.substr(offset));
       }
     };
+
     ImageTextModeXBin.prototype._parse_compressed = function(data) {
       var attr, ch, counter, info, type, x, y, _results;
       x = 0;
@@ -379,9 +429,7 @@
       _results = [];
       while (info = data.shift()) {
         info = this.getByteAt(info, 0);
-        if (info === 26) {
-          break;
-        }
+        if (info === 26) break;
         type = info & COMPRESSION_TYPE;
         counter = (info & COMPRESSION_COUNTER) + 1;
         ch = null;
@@ -396,24 +444,16 @@
                 attr = data.shift();
                 break;
               case CHARACTER_COMPRESSION:
-                if (!(ch != null)) {
-                  ch = data.shift();
-                }
+                if (!(ch != null)) ch = data.shift();
                 attr = data.shift();
                 break;
               case ATTRIBUTE_COMPRESSION:
-                if (!(attr != null)) {
-                  attr = data.shift();
-                }
+                if (!(attr != null)) attr = data.shift();
                 ch = data.shift();
                 break;
               default:
-                if (!(ch != null)) {
-                  ch = data.shift();
-                }
-                if (!(attr != null)) {
-                  attr = data.shift();
-                }
+                if (!(ch != null)) ch = data.shift();
+                if (!(attr != null)) attr = data.shift();
             }
             this.screen[y][x] = {
               ch: ch,
@@ -423,12 +463,14 @@
             if (x === this.header.width) {
               x = 0;
               y++;
-              if (y === this.header.height) {
-                break;
-              }
+              if (y === this.header.height) break;
               if (!(this.screen[y] != null)) {
-                this.screen[y] = [];
+                _results2.push(this.screen[y] = []);
+              } else {
+                _results2.push(void 0);
               }
+            } else {
+              _results2.push(void 0);
             }
           }
           return _results2;
@@ -436,17 +478,16 @@
       }
       return _results;
     };
+
     ImageTextModeXBin.prototype._parse_uncompressed = function(data) {
-      var attr, ch, i, x, y, _ref, _results, _step;
+      var attr, ch, i, x, y, _ref, _results;
       x = 0;
       y = 0;
       this.screen[y] = [];
       _results = [];
-      for (i = 0, _ref = data.length - 2, _step = 2; 0 <= _ref ? i <= _ref : i >= _ref; i += _step) {
+      for (i = 0, _ref = data.length - 2; i <= _ref; i += 2) {
         ch = data.substr(i, 1);
-        if (ch === "\x1a") {
-          break;
-        }
+        if (ch === "\x1a") break;
         attr = this.getByteAt(data, i + 1);
         this.screen[y][x] = {
           'ch': ch,
@@ -456,26 +497,35 @@
         if (x === this.header.width) {
           x = 0;
           y++;
-          if (y === this.header.height) {
-            break;
-          }
+          if (y === this.header.height) break;
           if (!(this.screen[y] != null)) {
-            this.screen[y] = [];
+            _results.push(this.screen[y] = []);
+          } else {
+            _results.push(void 0);
           }
+        } else {
+          _results.push(void 0);
         }
       }
       return _results;
     };
+
     ImageTextModeXBin.prototype.getWidth = function() {
       return this.header.width;
     };
+
     ImageTextModeXBin.prototype.getHeight = function() {
       return this.header.height;
     };
+
     return ImageTextModeXBin;
+
   }).call(this);
+
   this.ImageTextModeANSI = (function() {
+
     __extends(ImageTextModeANSI, this.ImageTextMode);
+
     function ImageTextModeANSI(options) {
       var k, v;
       ImageTextModeANSI.__super__.constructor.apply(this, arguments);
@@ -488,6 +538,7 @@
         this[k] = v;
       }
     }
+
     ImageTextModeANSI.prototype.parse = function(content) {
       var arg, args, ch, i, _i, _len, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9, _results;
       this.screen = [];
@@ -504,33 +555,38 @@
         if (this.state === 0) {
           switch (ch) {
             case "\x1a":
-              this.state = 3;
+              _results.push(this.state = 3);
               break;
             case "\x1b":
-              this.state = 1;
+              _results.push(this.state = 1);
               break;
             case "\n":
               this.x = 0;
-              this.y++;
+              _results.push(this.y++);
               break;
             case "\r":
               break;
             case "\t":
               i = (this.x + 1) % this.tabstop;
-              while (i-- > 0) {
-                this.putpixel(' ');
-              }
+              _results.push((function() {
+                var _results2;
+                _results2 = [];
+                while (i-- > 0) {
+                  _results2.push(this.putpixel(' '));
+                }
+                return _results2;
+              }).call(this));
               break;
             default:
-              this.putpixel(ch);
+              _results.push(this.putpixel(ch));
           }
         } else if (this.state === 1) {
           if (ch !== "[") {
             this.putpixel("\x1b");
             this.putpixel("[");
-            this.state = 0;
+            _results.push(this.state = 0);
           } else {
-            this.state = 2;
+            _results.push(this.state = 2);
           }
         } else if (this.state === 2) {
           if (ch.match('[A-Za-z]')) {
@@ -567,18 +623,12 @@
               case "f":
                 this.y = (args[0] || 1) - 1;
                 this.x = (args[1] || 1) - 1;
-                if (this.y < 0) {
-                  this.y = 0;
-                }
-                if (this.x < 0) {
-                  this.x = 0;
-                }
+                if (this.y < 0) this.y = 0;
+                if (this.x < 0) this.x = 0;
                 break;
               case "A":
                 this.y -= args[0] || 1;
-                if (this.y < 0) {
-                  this.y = 0;
-                }
+                if (this.y < 0) this.y = 0;
                 break;
               case "B":
                 this.y += args[0] || 1;
@@ -588,9 +638,7 @@
                 break;
               case "D":
                 this.x -= args[0] || 1;
-                if (this.x < 0) {
-                  this.x = 0;
-                }
+                if (this.x < 0) this.x = 0;
                 break;
               case "E":
                 this.y += args[0] || 1;
@@ -598,9 +646,7 @@
                 break;
               case "F":
                 this.y -= args[0] || 1;
-                if (this.y > 0) {
-                  this.y = 0;
-                }
+                if (this.y > 0) this.y = 0;
                 this.x = 0;
                 break;
               case "G":
@@ -649,22 +695,21 @@
                 }
             }
             this.argbuf = '';
-            this.state = 0;
+            _results.push(this.state = 0);
           } else {
-            this.argbuf += ch;
+            _results.push(this.argbuf += ch);
           }
         } else if (this.state === 3) {
           break;
         } else {
-          this.state = 0;
+          _results.push(this.state = 0);
         }
       }
       return _results;
     };
+
     ImageTextModeANSI.prototype.putpixel = function(ch) {
-      if (!(this.screen[this.y] != null)) {
-        this.screen[this.y] = [];
-      }
+      if (!(this.screen[this.y] != null)) this.screen[this.y] = [];
       this.screen[this.y][this.x] = {
         ch: ch,
         attr: this.attr
@@ -674,10 +719,15 @@
         return this.y++;
       }
     };
+
     return ImageTextModeANSI;
+
   }).call(this);
+
   this.ImageTextModeBin = (function() {
+
     __extends(ImageTextModeBin, this.ImageTextMode);
+
     function ImageTextModeBin(options) {
       var k, v;
       ImageTextModeBin.__super__.constructor.apply(this, arguments);
@@ -688,16 +738,15 @@
         this[k] = v;
       }
     }
+
     ImageTextModeBin.prototype.parse = function(content) {
-      var attr, ch, i, x, y, _ref, _step;
+      var attr, ch, i, x, y, _ref;
       x = 0;
       y = 0;
       this.screen[y] = [];
-      for (i = 0, _ref = content.length - 2, _step = 2; 0 <= _ref ? i <= _ref : i >= _ref; i += _step) {
+      for (i = 0, _ref = content.length - 2; i <= _ref; i += 2) {
         ch = content.substr(i, 1);
-        if (ch === "\x1a") {
-          break;
-        }
+        if (ch === "\x1a") break;
         attr = this.getByteAt(content, i + 1);
         this.screen[y][x] = {
           'ch': ch,
@@ -710,14 +759,17 @@
           this.screen[y] = [];
         }
       }
-      if (this.screen[y].length === 0) {
-        return this.screen.pop();
-      }
+      if (this.screen[y].length === 0) return this.screen.pop();
     };
+
     return ImageTextModeBin;
+
   }).call(this);
+
   this.ImageTextModeIDF = (function() {
+
     __extends(ImageTextModeIDF, this.ImageTextMode);
+
     function ImageTextModeIDF(options) {
       var k, v;
       ImageTextModeIDF.__super__.constructor.apply(this, arguments);
@@ -733,6 +785,7 @@
         this[k] = v;
       }
     }
+
     ImageTextModeIDF.prototype.parse = function(content) {
       var attr, buffer, ch, eodata, headerData, i, info, len, offset, x, y;
       headerData = content.substr(0, 12);
@@ -744,9 +797,7 @@
       this.header.x1 = this.unpackShort(headerData.substr(8, 2));
       this.header.y1 = this.unpackShort(headerData.substr(10, 2));
       eodata = content.length - 48 - 4096;
-      if (content.substr(content.length - 128, 5) === 'SAUCE') {
-        eodata -= 128;
-      }
+      if (content.substr(content.length - 128, 5) === 'SAUCE') eodata -= 128;
       this.parseFontData(content.substr(eodata, 4096));
       this.parsePaletteData(content.substr(eodata + 4096, 48));
       y = 0;
@@ -779,16 +830,20 @@
           }
         }
       }
-      if (this.screen[y].length === 0) {
-        return this.screen.pop();
-      }
+      if (this.screen[y].length === 0) return this.screen.pop();
     };
+
     return ImageTextModeIDF;
+
   }).call(this);
+
   this.ImageTextModeADF = (function() {
     var COLOR_INDEX;
+
     __extends(ImageTextModeADF, this.ImageTextMode);
+
     COLOR_INDEX = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63];
+
     function ImageTextModeADF(options) {
       var k, v;
       ImageTextModeADF.__super__.constructor.apply(this, arguments);
@@ -801,19 +856,18 @@
         this[k] = v;
       }
     }
+
     ImageTextModeADF.prototype.parse = function(content) {
-      var attr, ch, i, x, y, _ref, _step;
+      var attr, ch, i, x, y, _ref;
       this.header.version = this.getByteAt(content, 0);
       this.parsePaletteData(content.substr(1, 192));
       this.parseFontData(content.substr(193, 4096));
       x = 0;
       y = 0;
       this.screen[y] = [];
-      for (i = 4289, _ref = content.length - 2, _step = 2; 4289 <= _ref ? i <= _ref : i >= _ref; i += _step) {
+      for (i = 4289, _ref = content.length - 2; i <= _ref; i += 2) {
         ch = content.substr(i, 1);
-        if (ch === "\x1a") {
-          break;
-        }
+        if (ch === "\x1a") break;
         attr = this.getByteAt(content, i + 1);
         this.screen[y][x] = {
           'ch': ch,
@@ -826,10 +880,9 @@
           this.screen[y] = [];
         }
       }
-      if (this.screen[y].length === 0) {
-        return this.screen.pop();
-      }
+      if (this.screen[y].length === 0) return this.screen.pop();
     };
+
     ImageTextModeADF.prototype.parsePaletteData = function(data) {
       var b, colors, g, i, j, r, _i, _len;
       colors = [];
@@ -848,10 +901,15 @@
         colors: colors
       });
     };
+
     return ImageTextModeADF;
+
   }).call(this);
+
   this.ImageTextModeTundra = (function() {
+
     __extends(ImageTextModeTundra, this.ImageTextMode);
+
     function ImageTextModeTundra(options) {
       var k, v;
       ImageTextModeTundra.__super__.constructor.apply(this, arguments);
@@ -861,6 +919,7 @@
         this[k] = v;
       }
     }
+
     ImageTextModeTundra.prototype.parse = function(content) {
       var bg, ch, colors, command, fg, palidx, rgb, x, y, _i;
       colors = [[0, 0, 0]];
@@ -872,16 +931,12 @@
       this.screen[y] = [];
       content = content.substr(8).split('');
       while (command = content.shift()) {
-        if (command === "\x1a") {
-          break;
-        }
+        if (command === "\x1a") break;
         command = command.charCodeAt(0);
         if (command === 1) {
           y = this.unpackLong(content.splice(0, 4).join(''));
           x = this.unpackLong(content.splice(0, 4).join(''));
-          if (!(this.screen[y] != null)) {
-            this.screen[y] = [];
-          }
+          if (!(this.screen[y] != null)) this.screen[y] = [];
           continue;
         }
         ch = null;
@@ -904,9 +959,7 @@
             colors.push([(rgb >> 16) & 0x000000ff, (rgb >> 8) & 0x000000ff, rgb & 0x000000ff]);
           }
         }
-        if (ch == null) {
-          ch = String.fromCharCode(command);
-        }
+        if (ch == null) ch = String.fromCharCode(command);
         this.screen[y][x] = {
           'ch': ch,
           'fg': fg,
@@ -919,17 +972,20 @@
           this.screen[y] = [];
         }
       }
-      if (this.screen[y].length === 0) {
-        this.screen.pop();
-      }
+      if (this.screen[y].length === 0) this.screen.pop();
       return this.palette = new ImageTextModePalette({
         colors: colors
       });
     };
+
     return ImageTextModeTundra;
+
   }).call(this);
+
   this.ImageTextModePCBoard = (function() {
+
     __extends(ImageTextModePCBoard, this.ImageTextMode);
+
     function ImageTextModePCBoard(options) {
       var k, v;
       ImageTextModePCBoard.__super__.constructor.apply(this, arguments);
@@ -945,6 +1001,7 @@
         this[k] = v;
       }
     }
+
     ImageTextModePCBoard.prototype.parse = function(content) {
       var ch, code, i, key, val, _i, _j, _ref, _results;
       this.screen = [];
@@ -964,25 +1021,30 @@
         if (this.state === 0) {
           switch (ch) {
             case "\x1a":
-              this.state = 2;
+              _results.push(this.state = 2);
               break;
             case '@':
-              this.state = 1;
+              _results.push(this.state = 1);
               break;
             case "\n":
               this.x = 0;
-              this.y++;
+              _results.push(this.y++);
               break;
             case "\r":
               break;
             case "\t":
               i = (this.x + 1) % this.tabstop;
-              while (i-- > 0) {
-                this.putpixel(' ');
-              }
+              _results.push((function() {
+                var _results2;
+                _results2 = [];
+                while (i-- > 0) {
+                  _results2.push(this.putpixel(' '));
+                }
+                return _results2;
+              }).call(this));
               break;
             default:
-              this.putpixel(ch);
+              _results.push(this.putpixel(ch));
           }
         } else if (this.state === 1) {
           if (ch === 'X') {
@@ -997,28 +1059,25 @@
               content.shift();
             }
             this.x = content.shift();
-            if (content[0] === !'@') {
-              this.x += content.shift();
-            }
+            if (content[0] === !'@') this.x += content.shift();
             this.x--;
             content.shift();
           } else {
             this.putpixel('@');
             this.putpixel(ch);
           }
-          this.state = 0;
+          _results.push(this.state = 0);
         } else if (this.state === 2) {
           break;
         } else {
-          this.state = 0;
+          _results.push(this.state = 0);
         }
       }
       return _results;
     };
+
     ImageTextModePCBoard.prototype.putpixel = function(ch) {
-      if (!(this.screen[this.y] != null)) {
-        this.screen[this.y] = [];
-      }
+      if (!(this.screen[this.y] != null)) this.screen[this.y] = [];
       this.screen[this.y][this.x] = {
         ch: ch,
         attr: this.attr
@@ -1028,10 +1087,15 @@
         return this.y++;
       }
     };
+
     return ImageTextModePCBoard;
+
   }).call(this);
+
   this.ImageTextModeAVATAR = (function() {
+
     __extends(ImageTextModeAVATAR, this.ImageTextMode);
+
     function ImageTextModeAVATAR(options) {
       var k, v;
       ImageTextModeAVATAR.__super__.constructor.apply(this, arguments);
@@ -1043,8 +1107,9 @@
         this[k] = v;
       }
     }
+
     ImageTextModeAVATAR.prototype.parse = function(content) {
-      var c, ch, i, _ref, _ref2, _results;
+      var c, ch, i, _results;
       this.screen = [];
       this.x = 0;
       this.y = 0;
@@ -1056,76 +1121,97 @@
           break;
         } else if (ch === "\n") {
           this.x = 0;
-          this.y++;
+          _results.push(this.y++);
         } else if (ch === "\r") {
           continue;
         } else if (ch === "\t") {
           i = (this.x + 1) % this.tabstop;
-          while (i-- > 0) {
-            this.putpixel(' ');
-          }
+          _results.push((function() {
+            var _results2;
+            _results2 = [];
+            while (i-- > 0) {
+              _results2.push(this.putpixel(' '));
+            }
+            return _results2;
+          }).call(this));
         } else if (ch.charCodeAt(0) === 12) {
           this.screen = [];
           this.attr = 3;
-          this.insert = false;
+          _results.push(this.insert = false);
         } else if (ch.charCodeAt(0) === 25) {
           ch = content.shift();
           i = content.shift().charCodeAt(0);
-          while (i-- > 0) {
-            this.putpixel(ch);
-          }
+          _results.push((function() {
+            var _results2;
+            _results2 = [];
+            while (i-- > 0) {
+              _results2.push(this.putpixel(ch));
+            }
+            return _results2;
+          }).call(this));
         } else if (ch.charCodeAt(0) === 22) {
           c = content.shift().charCodeAt(0);
           switch (c) {
             case 1:
-              this.attr = content.shift().charCodeAt(0) & 0x7f;
+              _results.push(this.attr = content.shift().charCodeAt(0) & 0x7f);
               break;
             case 2:
-              this.attr |= 0x80;
+              _results.push(this.attr |= 0x80);
               break;
             case 3:
               this.y--;
               if (this.y < 0) {
-                this.y = 0;
+                _results.push(this.y = 0);
+              } else {
+                _results.push(void 0);
               }
               break;
             case 4:
-              this.y++;
+              _results.push(this.y++);
               break;
             case 5:
               this.x--;
               if (this.x < 0) {
-                this.x = 0;
+                _results.push(this.x = 0);
+              } else {
+                _results.push(void 0);
               }
               break;
             case 6:
-              this.x++;
+              _results.push(this.x++);
               break;
             case 7:
-              for (i = _ref = this.x, _ref2 = screen[this.y].length - 1; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-                this.screen[this.y][i] = null;
-              }
+              _results.push((function() {
+                var _ref, _ref2, _results2;
+                _results2 = [];
+                for (i = _ref = this.x, _ref2 = screen[this.y].length - 1; _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
+                  _results2.push(this.screen[this.y][i] = null);
+                }
+                return _results2;
+              }).call(this));
               break;
             case 8:
               this.y = content.shift().charCodeAt(0) - 1;
               this.x = content.shift().charCodeAt(0) - 1;
-              if (this.y < 0) {
-                this.y = 0;
-              }
+              if (this.y < 0) this.y = 0;
               if (this.x < 0) {
-                this.x = 0;
+                _results.push(this.x = 0);
+              } else {
+                _results.push(void 0);
               }
+              break;
+            default:
+              _results.push(void 0);
           }
         } else {
-          this.putpixel(ch);
+          _results.push(this.putpixel(ch));
         }
       }
       return _results;
     };
+
     ImageTextModeAVATAR.prototype.putpixel = function(ch) {
-      if (!(this.screen[this.y] != null)) {
-        this.screen[this.y] = [];
-      }
+      if (!(this.screen[this.y] != null)) this.screen[this.y] = [];
       this.screen[this.y][this.x] = {
         ch: ch,
         attr: this.attr
@@ -1135,6 +1221,9 @@
         return this.y++;
       }
     };
+
     return ImageTextModeAVATAR;
+
   }).call(this);
+
 }).call(this);
