@@ -998,11 +998,11 @@ class @ImageTextMode
                     fg = pixel.fg
                     bg = pixel.bg
 
-                px = cx * 8
-                py = cy * 16
+                px = cx * @font.width
+                py = cy * @font.height
 
                 ctx.fillStyle = @palette.toRgbaString( @palette.colors[ bg ] )
-                ctx.fillRect px, py, 8, 16
+                ctx.fillRect px, py, @font.width, @font.height
 
                 ctx.fillStyle = @palette.toRgbaString( @palette.colors[ fg ] )
                 chr = @font.chars[ pixel.ch.charCodeAt( 0 ) & 0xff ]
