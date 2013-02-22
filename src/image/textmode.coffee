@@ -1017,6 +1017,19 @@ class @ImageTextMode
         ctx = canvasElem.getContext '2d'
         ctx.drawImage canvas, 0, 0
 
+    toBinaryArray: (str) ->
+        buf = new ArrayBuffer(str.length * 2) # 2 bytes for each char
+        bufView = new Uint8Array(buf)
+        i = 0
+        strLen = str.length
+
+        while i < strLen
+            bufView[i] = str.charCodeAt(i)
+            i++
+        buf
+
+
+
 class @ImageTextModeXBin extends @ImageTextMode
 
     # Header constants
@@ -1135,6 +1148,17 @@ class @ImageTextModeXBin extends @ImageTextMode
         return @header.height
 
 class @ImageTextModeANSI extends @ImageTextMode
+    ANSI_ESC        = String.fromCharCode(0x1b)
+    ANSI_CSI        = ANSI_ESC + '['
+    ANSI_TEXT_PROP  = 'm'
+    ANSI_RESET      = '0'
+    ANSI_FG         = '3'
+    ANSI_BG         = '4'
+    ANSI_FG_INTENSE = '9'
+    ANSI_BG_INTENSE = '10'
+    ANSI_CUR_DOWN   = 'B'
+    ANSI_SEP        = ';'
+    ANSI_RETURN     = 'A'
 
     constructor: ( options ) ->
         super
@@ -1142,6 +1166,34 @@ class @ImageTextModeANSI extends @ImageTextMode
         @tabstop  = 8
         @linewrap = 80
         this[k]  = v for own k, v of options
+
+    write: ->
+        content = "#{ ANSI_CSI }2J" # initiate document
+        for y in [0..@screen.length - 1]
+            continue if !@screen[y]?
+            for x in [0..@getWidth() - 1]
+                pixel = @screen[y][x]
+                if !pixel?
+                    pixel = { ch: ' ', attr: 7   }
+                attr = @gen_args(pixel.attr)
+                if (attr != prevattr)
+                    content += "#{ANSI_CSI}0;#{attr}#{ANSI_TEXT_PROP}"   
+                    prevattr = attr
+                content += if pixel.ch? then pixel.ch else ' '
+                max_x = x
+            #content += "\n"
+            #content += ANSI_CSI + ANSI_RETURN  # go to the next line
+        content += "#{ ANSI_CSI }0m"
+        @toBinaryArray(content)
+
+
+    gen_args: ( attr ) ->
+        fg      = 30 + ( attr & 7 )
+        bg      = 40  + ( ( attr & 112 ) >> 4)
+        bl      = if attr & 128 then 5 else ''
+        intense = if attr & 8 then 1 else ''
+        attrs = a for a in [fg, bg, bl, intense] when a != ''
+        return [fg, bg, bl, intense].join(";")
 
     parse: ( content ) ->
         @screen = []
