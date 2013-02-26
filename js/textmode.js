@@ -358,6 +358,19 @@
       return ctx.drawImage(canvas, 0, 0);
     };
 
+    ImageTextMode.prototype.toBinaryArray = function(str) {
+      var buf, bufView, i, strLen;
+      buf = new ArrayBuffer(str.length * 2);
+      bufView = new Uint8Array(buf);
+      i = 0;
+      strLen = str.length;
+      while (i < strLen) {
+        bufView[i] = str.charCodeAt(i);
+        i++;
+      }
+      return buf;
+    };
+
     return ImageTextMode;
 
   })();
@@ -557,8 +570,31 @@
   })(this.ImageTextMode);
 
   this.ImageTextModeANSI = (function(_super) {
+    var ANSI_BG, ANSI_BG_INTENSE, ANSI_CSI, ANSI_CUR_DOWN, ANSI_ESC, ANSI_FG, ANSI_FG_INTENSE, ANSI_RESET, ANSI_RETURN, ANSI_SEP, ANSI_TEXT_PROP;
 
     __extends(ImageTextModeANSI, _super);
+
+    ANSI_ESC = String.fromCharCode(0x1b);
+
+    ANSI_CSI = ANSI_ESC + '[';
+
+    ANSI_TEXT_PROP = 'm';
+
+    ANSI_RESET = '0';
+
+    ANSI_FG = '3';
+
+    ANSI_BG = '4';
+
+    ANSI_FG_INTENSE = '9';
+
+    ANSI_BG_INTENSE = '10';
+
+    ANSI_CUR_DOWN = 'B';
+
+    ANSI_SEP = ';';
+
+    ANSI_RETURN = 'A';
 
     function ImageTextModeANSI(options) {
       var k, v;
@@ -572,6 +608,53 @@
         this[k] = v;
       }
     }
+
+    ImageTextModeANSI.prototype.write = function() {
+      var attr, content, max_x, pixel, prevattr, x, y, _i, _j, _ref, _ref1;
+      content = "" + ANSI_CSI + "2J";
+      for (y = _i = 0, _ref = this.screen.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; y = 0 <= _ref ? ++_i : --_i) {
+        if (!(this.screen[y] != null)) {
+          content += "\n";
+        }
+        if (!(this.screen[y] != null)) {
+          continue;
+        }
+        for (x = _j = 0, _ref1 = this.getWidth() - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
+          pixel = this.screen[y][x];
+          if (!(pixel != null)) {
+            pixel = {
+              ch: ' ',
+              attr: 7
+            };
+          }
+          attr = this.gen_args(pixel.attr);
+          if (attr !== prevattr) {
+            content += "" + ANSI_CSI + "0;" + attr + ANSI_TEXT_PROP;
+            prevattr = attr;
+          }
+          content += pixel.ch != null ? pixel.ch : ' ';
+          max_x = x;
+        }
+      }
+      content += "" + ANSI_CSI + "0m";
+      return this.toBinaryArray(content);
+    };
+
+    ImageTextModeANSI.prototype.gen_args = function(attr) {
+      var a, attrs, bg, bl, fg, intense, _i, _len, _ref;
+      fg = 30 + (attr & 7);
+      bg = 40 + ((attr & 112) >> 4);
+      bl = attr & 128 ? 5 : '';
+      intense = attr & 8 ? 1 : '';
+      _ref = [fg, bg, bl, intense];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        a = _ref[_i];
+        if (a !== '') {
+          attrs = a;
+        }
+      }
+      return [fg, bg, bl, intense].join(";");
+    };
 
     ImageTextModeANSI.prototype.parse = function(content) {
       var arg, args, ch, i, _i, _j, _k, _l, _len, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _results;

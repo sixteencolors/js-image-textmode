@@ -1170,6 +1170,7 @@ class @ImageTextModeANSI extends @ImageTextMode
     write: ->
         content = "#{ ANSI_CSI }2J" # initiate document
         for y in [0..@screen.length - 1]
+            content += "\n" if !@screen[y]?
             continue if !@screen[y]?
             for x in [0..@getWidth() - 1]
                 pixel = @screen[y][x]
